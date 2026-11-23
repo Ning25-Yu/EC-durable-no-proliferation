@@ -44,6 +44,7 @@ NEW_STEPS = [
 ]
 FIGURE_STEPS = [
     "figure1_transcriptomic.py",
+    "figure1_panels.py",  # after figure1_transcriptomic.py: redraws panels a and f for the manuscript layout
     "figure2_model.py",
     "figure3_duration.py",
     "figure4_dynamics.py",

@@ -1,10 +1,9 @@
 """Figure 2. The model and its input contexts.
-(a) signed interaction matrix of the 37 nodes; (b) the 16 input contexts with the number of non-input nodes fixed by
+(a) the full network: 37 nodes and 168 signed interactions drawn with horizontal and vertical connectors; (b) the 16 input contexts with the number of non-input nodes fixed by
 the inputs and the number of attractors; (c) the seven free nodes of C0101 (orthogonal edges) and the states of its
 two fixed points."""
 
 import os
-import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "lib"))
@@ -19,56 +18,6 @@ import style as S
 from paths import FIGURES, TAB
 
 S.apply()
-ORDER = [n for _, g in S.MODULES for n in g]
-
-
-def signed_edges():
-    out = []
-    for target, rule in ecbn.RULES.items():
-        if target in ecbn.INPUTS:
-            continue
-        seen = {}
-        for neg, src in re.findall(r"(!?)([A-Za-z_][A-Za-z0-9_]*)", rule):
-            seen[src] = -1 if neg else 1
-        out += [(src, target, sign) for src, sign in seen.items()]
-    return out
-
-
-def panel_matrix(ax):
-    ix = {n: i for i, n in enumerate(ORDER)}
-    edges = signed_edges()
-    assert len(edges) == 168
-    n = len(ORDER)
-    ax.set_xlim(-0.5, n - 0.5)
-    ax.set_ylim(n - 0.5, -0.5)
-    ax.set_aspect("equal")
-    start = 0
-    for k, (name, group) in enumerate(S.MODULES):
-        if k % 2 == 0:
-            ax.add_patch(Rectangle((start - 0.5, -0.5), len(group), n, color=S.PALE, lw=0, zorder=0))
-            ax.add_patch(Rectangle((-0.5, start - 0.5), n, len(group), color=S.PALE, lw=0, zorder=0))
-        start += len(group)
-    for src, tgt, sign in edges:
-        ax.add_patch(
-            Rectangle((ix[tgt] - 0.4, ix[src] - 0.4), 0.8, 0.8, color=S.BLUE if sign > 0 else S.RUST, lw=0, zorder=2)
-        )
-    ax.set_xticks(range(n))
-    ax.set_yticks(range(n))
-    ax.set_xticklabels([S.label(x) for x in ORDER], rotation=90, fontsize=5.6)
-    ax.set_yticklabels([S.label(x) for x in ORDER], fontsize=5.6)
-    ax.tick_params(length=0, pad=1.5)
-    ax.xaxis.tick_top()
-    for s in ax.spines.values():
-        s.set_visible(True)
-        s.set_linewidth(0.5)
-    ax.set_ylabel("Regulator")
-    ax.set_xlabel("Target")
-    ax.xaxis.set_label_position("top")
-    ax.scatter([], [], marker="s", s=22, color=S.BLUE, label="activation")
-    ax.scatter([], [], marker="s", s=22, color=S.RUST, label="inhibition")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.01), ncol=2, handletextpad=0.2, columnspacing=1.2)
-
-
 def panel_contexts(ax_code, ax_fix, ax_h):
     D = pd.read_csv(TAB + "/K1_context_landscape.csv")
     D = D.sort_values(["n_proliferative_attractors", "nodes_fixed_by_inputs"], ascending=[False, False]).reset_index(drop=True)
@@ -107,7 +56,7 @@ def panel_contexts(ax_code, ax_fix, ax_h):
     from matplotlib.patches import Patch
 
     ax_fix.legend(handles=[Patch(color=S.BLUE, label="context with a proliferative attractor"), Patch(color=S.LIGHT, label="context without")],
-                  loc="upper left", bbox_to_anchor=(-0.85, -0.2), ncol=1, fontsize=7, handlelength=1.0, handletextpad=0.4, labelspacing=0.2)
+                  loc="upper left", bbox_to_anchor=(-0.85, -0.29), ncol=1, fontsize=7, handlelength=1.0, handletextpad=0.4, labelspacing=0.2)
 
 
 GROW = {"AKT2": 1, "CCND2": 1, "CCND3": 1, "CDKN1B": 0, "IRF1": 0, "MYC": 1, "Proliferation": 1}
@@ -132,19 +81,46 @@ def state_table(ax):
     ax.axis("off")
 
 
+SWITCH = {"IRF1", "MYC", "AKT2", "CDKN1B", "CCND2", "CCND3", "Proliferation"}
+
+
+def panel_network(fig, y0, W=7.2):
+    """All 168 interactions; the seven switch nodes of context C0101 (panel c) are shaded."""
+    from matplotlib.lines import Line2D
+
+    boxes, bands, H = N.full_layout(W, py=0.27, head=0.30, foot=0.04)
+    ax = N.net_axes(fig, 0, y0, W, H)
+    N.draw_bands(ax, bands, fs=6.8)
+    N.draw_edges(ax, boxes, N.signed_edges(), lw=0.40, head=0.024, lane_sep=0.014, track_sep=0.014)
+
+    def style(n):
+        fc, ec, tc, lw, ls = N.default_node_style(n)
+        return (S.LIGHT if n in SWITCH else fc), ec, tc, lw, ls
+
+    N.draw_nodes(ax, boxes, style)
+    ax.legend(handles=[Line2D([], [], color=N.ACT, lw=0.9, marker=">", ms=3.5, markevery=[1], label="activation"),
+                       Line2D([], [], color=N.INH, lw=0.9, marker="|", ms=5, markevery=[1], label="inhibition")],
+              loc="upper center", bbox_to_anchor=(0.5, -0.005), ncol=2, fontsize=7.5, handlelength=2.2,
+              columnspacing=1.6, borderaxespad=0.0)
+    return ax, H
+
+
 if __name__ == "__main__":
-    fig = plt.figure(figsize=(7.2, 6.7))
-    ax_m = fig.add_axes([0.07, 0.385, 0.50, 0.54])
-    panel_matrix(ax_m)
-    S.panel(ax_m, "a", dx=-0.09, dy=1.10)
-    ax_c = fig.add_axes([0.68, 0.50, 0.06, 0.40])
-    ax_f = fig.add_axes([0.755, 0.50, 0.105, 0.40])
-    ax_h = fig.add_axes([0.885, 0.50, 0.105, 0.40])
+    W, FH = 7.2, 7.40
+    fig = plt.figure(figsize=(W, FH))
+    ax_m, H = panel_network(fig, FH - 0.02 - 3.17)
+    S.panel(ax_m, "a", dx=0.03, dy=1.0)
+    inch = lambda x, y, w, h: fig.add_axes([x / W, y / FH, w / W, h / FH])
+    ax_c = inch(0.62, 0.85, 0.42, 2.30)
+    ax_f = inch(1.14, 0.85, 0.78, 2.30)
+    ax_h = inch(2.07, 0.85, 0.78, 2.30)
     panel_contexts(ax_c, ax_f, ax_h)
-    S.panel(ax_c, "b", dx=-0.75, dy=1.13)
-    ax1 = N.net_axes(fig, 0.30, 0.20, 3.55, 1.95)
-    N.draw_switch(ax1, 3.55, 1.95)
+    S.panel(ax_c, "b", dx=-1.25, dy=1.20)
+    S.attach("b", ax_f, ax_h)
+    ax1 = N.net_axes(fig, 3.55, 1.45, 3.55, 1.85)
+    N.draw_switch(ax1, 3.55, 1.85)
     S.panel(ax1, "c", dx=0.0, dy=1.0)
-    ax2 = fig.add_axes([0.55, 0.07, 0.44, 0.22])
+    ax2 = inch(3.75, 0.05, 3.35, 1.20)
     state_table(ax2)
+    S.attach("c", ax2)
     S.save(fig, FIGURES, "Figure2")

@@ -29,25 +29,30 @@ CURVES = [
 
 def panel_protocol(ax):
     ax.set_xlim(-1.2, 10.6)
-    ax.set_ylim(-2.3, 2.6)
+    ax.set_ylim(-1.0, 2.6)
     ax.axis("off")
     ax.add_patch(Rectangle((0, 0.55), 4, 0.9, fc=S.LIGHT, ec=S.INK, lw=0.6))
-    ax.text(2, 1.0, "exposure", ha="center", va="center", fontsize=8.5)
+    ax.text(2, 1.0, "exposure $L$", ha="center", va="center", fontsize=8.5)
     ax.annotate("", xy=(10.3, 0), xytext=(-1.0, 0), arrowprops=dict(arrowstyle="-|>", lw=0.7, color=S.INK))
-    for x, t in [(0, "0"), (4, "$L$")]:
+    for x, t in [(0, "start"), (4, "withdrawal")]:
         ax.plot([x, x], [-0.12, 0.12], color=S.INK, lw=0.7)
         ax.text(x, -0.25, t, ha="center", va="top", fontsize=8.5)
     ax.text(10.3, -0.25, "time", ha="right", va="top", fontsize=8.5)
     ax.text(-0.6, 1.9, "proliferating", ha="center", fontsize=8)
     ax.text(2, 1.9, "target held ON or OFF", ha="center", fontsize=8)
     ax.text(7.2, 1.9, "withdrawal, network unperturbed", ha="center", fontsize=8)
-    ax.plot([4, 4], [0.12, 2.3], color=S.GREY, lw=0.5, ls=(0, (3, 2)))
-    ax.plot([0, 0], [0.12, 2.3], color=S.GREY, lw=0.5, ls=(0, (3, 2)))
-    for y, lab, col in [(1.0, "durable arrest, probability $a(L)$", S.BLUE), (0.35, "regrowth, $1-a(L)$", S.RUST)]:
-        ax.add_patch(FancyArrowPatch((4.15, 0.68), (6.3, y), arrowstyle="-|>", mutation_scale=6, lw=0.8, color=col, connectionstyle="arc3,rad=0.0"))
-        ax.text(6.45, y, lab, ha="left", va="center", fontsize=8, color=col)
-    ax.text(4.6, -1.25, "$a(L)=\\delta_{s_0^{c}}\\,e^{Q_cL}\\,h$,     $Qh=0$", ha="center", va="center", fontsize=9.5)
-    ax.text(4.6, -2.0, "$L_{50}$, $L_{90}$: exposure for $a=0.5$ and $a=0.9$", ha="center", va="center", fontsize=8.5)
+    ax.plot([4, 4], [0.12, 1.75], color=S.GREY, lw=0.5, ls=(0, (3, 2)))
+    ax.plot([0, 0], [0.12, 1.75], color=S.GREY, lw=0.5, ls=(0, (3, 2)))
+    # after withdrawal the network continues from the state it reached during exposure (dot) and ends in one of the
+    # two fixed points of C0101; the blue branch is the durable arrest probability
+    ax.plot(4, 1.0, "o", ms=3.2, color=S.INK, zorder=6)
+    ax.text(4.55, 1.0, "state at\nwithdrawal", ha="left", va="center", fontsize=7.5, color=S.GREY, linespacing=1.1)
+    for y, lab, col in [(1.62, "non-proliferative\nfixed point", S.BLUE), (0.38, "proliferative\nfixed point", S.RUST)]:
+        ax.add_patch(FancyArrowPatch((4.05, 1.0 + (y - 1.0) * 0.06), (6.6, y), arrowstyle="-|>", mutation_scale=6, lw=0.8,
+                                     color=col, shrinkA=0, shrinkB=0))
+        ax.text(6.75, y, lab, ha="left", va="center", fontsize=8, color=col, linespacing=1.1)
+    ax.text(5.15, 1.50, "$a(L)$", ha="center", va="bottom", fontsize=8.5, color=S.BLUE)
+    ax.text(5.15, 0.50, "$1-a(L)$", ha="center", va="top", fontsize=8.5, color=S.RUST)
 
 
 def panel_curves(ax, column, ylabel):
@@ -60,7 +65,7 @@ def panel_curves(ax, column, ylabel):
     ax.set_xlim(0, 12)
     ax.set_ylim(-0.03, 1.03)
     ax.set_xticks([0, 2, 4, 6, 8, 10, 12])
-    ax.set_xlabel("Exposure duration $L$")
+    ax.set_xlabel("Exposure duration")
     ax.set_ylabel(ylabel)
 
 
@@ -79,8 +84,8 @@ def panel_l50(ax):
     ax.set_xlim(0, 6)
     ax.set_xticks([0, 2, 4, 6])
     ax.set_xlabel("Exposure duration")
-    ax.plot([], [], ls="none", marker="o", ms=5, mfc="white", mec=S.BLUE, mew=1.0, label="$L_{50}$")
-    ax.plot([], [], ls="none", marker="o", ms=5, mfc=S.BLUE, mec=S.BLUE, label="$L_{90}$")
+    ax.plot([], [], ls="none", marker="o", ms=5, mfc="white", mec=S.BLUE, mew=1.0, label="50% arrest")
+    ax.plot([], [], ls="none", marker="o", ms=5, mfc=S.BLUE, mec=S.BLUE, label="90% arrest")
     ax.legend(loc="lower right", fontsize=7.5, handletextpad=0.1, labelspacing=0.25)
 
 
@@ -107,14 +112,14 @@ def panel_screen(ax):
 
 if __name__ == "__main__":
     fig = plt.figure(figsize=(7.2, 5.9))
-    ax_a = fig.add_axes([0.03, 0.60, 0.60, 0.37])
+    ax_a = fig.add_axes([0.03, 0.64, 0.60, 0.30])
     panel_protocol(ax_a)
     S.panel(ax_a, "a", dx=0.035, dy=0.93)
     ax_d = fig.add_axes([0.765, 0.08, 0.22, 0.80])
     panel_screen(ax_d)
     S.panel(ax_d, "d", dx=-0.85, dy=1.09)
     ax_b = fig.add_axes([0.075, 0.08, 0.215, 0.40])
-    panel_curves(ax_b, "arrest", "Durable arrest probability $a(L)$")
+    panel_curves(ax_b, "arrest", "Durable arrest probability")
     for yv in (0.5, 0.9):
         ax_b.axhline(yv, color=S.GREY, lw=0.5, ls=(0, (3, 2)), zorder=0)
     ax_b.legend(loc="lower right", bbox_to_anchor=(1.02, 0.03), ncol=1, fontsize=6.3, handlelength=1.5, labelspacing=0.2, borderaxespad=0.2)
@@ -123,3 +128,13 @@ if __name__ == "__main__":
     panel_l50(ax_c)
     S.panel(ax_c, "c", dx=-0.5, dy=1.03)
     S.save(fig, FIGURES, "Figure3")
+
+    # Taller stand-alone panel a for the panel-by-panel layout: in the manuscript it sits above panels b and c and
+    # beside panel d, and this height makes the left column as tall as panel d. It overwrites fig3a.pdf.
+    S.apply()
+    fig = plt.figure(figsize=(7.2, 3.95))
+    ax_a = fig.add_axes([0.03, 0.04, 0.60, 0.92])
+    panel_protocol(ax_a)
+    S.panel(ax_a, "a")
+    S.save_panels(fig, FIGURES, "fig3")
+    plt.close(fig)

@@ -42,13 +42,13 @@ def panel_schedules(ax):
     ax.plot(D.L, D.MYC_first, color=S.INK, lw=1.1, ls=(0, (5, 2)), label="MYC first")
     ax.plot(D.L, D.CCND2_first, color=S.GREY, lw=1.1, ls=(0, (1.5, 1.5)), label="CCND2 first")
     ax.plot(star.L_star, star.arrest_at_L_star, marker="o", ms=4, mfc="white", mec=S.INK, mew=0.8, zorder=5)
-    ax.annotate(f"$L^*={star.L_star:.2f}$", (star.L_star, star.arrest_at_L_star), xytext=(6, -9), textcoords="offset points", fontsize=7.5)
+    ax.annotate(f"crossover at {star.L_star:.2f}", (star.L_star, star.arrest_at_L_star), xytext=(6, -9), textcoords="offset points", fontsize=7.5)
     ax.set_xscale("log", base=2)
     ax.set_xticks([0.25, 0.5, 1, 2, 4, 8])
     ax.set_xticklabels(["0.25", "0.5", "1", "2", "4", "8"])
     ax.set_xlim(0.25, 8)
     ax.set_ylim(-0.03, 1.05)
-    ax.set_xlabel("Phase length $L$ (budget $2L$)")
+    ax.set_xlabel("Length of each phase")
     ax.set_ylabel("Durable arrest probability")
     ax.legend(loc="upper left", fontsize=7.5, handlelength=2.2, labelspacing=0.25)
 
@@ -56,11 +56,11 @@ def panel_schedules(ax):
 def panel_rates(ax):
     R = pd.read_csv(TAB + "/K7_rate_draws.csv")
     series = [
-        ("p27_pulse_L4", "p27 ON\n$L=4$", S.GREY),
-        ("p27_pulse_L8", "p27 ON\n$L=8$", S.BLUE),
-        ("concurrent_L8", "concurrent\n$L=8$", S.BLUE),
-        ("MYC_then_CCND2_L8", "MYC first\n$L=8$", S.INK),
-        ("CCND2_then_MYC_L8", "CCND2 first\n$L=8$", S.GREY),
+        ("p27_pulse_L4", "p27 ON\nexposure 4", S.GREY),
+        ("p27_pulse_L8", "p27 ON\nexposure 8", S.BLUE),
+        ("concurrent_L8", "concurrent\nexposure 8", S.BLUE),
+        ("MYC_then_CCND2_L8", "MYC first\nexposure 8", S.INK),
+        ("CCND2_then_MYC_L8", "CCND2 first\nexposure 8", S.GREY),
     ]
     rng = np.random.default_rng(1)
     for i, (c, lab, col) in enumerate(series):
@@ -83,6 +83,8 @@ if __name__ == "__main__":
         panel_time(ax, case, title, k == 0)
         if k == 0:
             S.panel(ax, "a", dx=-0.17, dy=1.06)
+        else:
+            S.attach("a", ax)
         if k == 2:
             ax.legend(loc="center right", fontsize=7.5, handlelength=2.2, labelspacing=0.25)
     ax_b = fig.add_axes([0.075, 0.10, 0.36, 0.34])

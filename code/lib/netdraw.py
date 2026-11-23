@@ -167,7 +167,11 @@ SWITCH_GRID = {"IRF1": (0, 0), "MYC": (0, 1), "AKT2": (0, 2), "CDKN1B": (1, 1), 
 def switch_layout(W, H, bw=0.50, bh=0.19, mx=0.14):
     px = (W - 2 * mx - bw) / 3
     py = (H - bh - 0.24) / 2
-    return {n: Box(mx + bw / 2 + c * px, H - 0.12 - bh / 2 - r * py, bw, bh) for n, (c, r) in SWITCH_GRID.items()}
+    boxes = {n: Box(mx + bw / 2 + c * px, H - 0.12 - bh / 2 - r * py, bw, bh) for n, (c, r) in SWITCH_GRID.items()}
+    b = boxes["Proliferation"]  # the written-out name needs a wider box; keep its right edge in place
+    wp = max(bw, text_width("Proliferation", 7.2))
+    boxes["Proliferation"] = Box(b.x + bw / 2 - wp / 2, b.y, wp, bh)
+    return boxes
 
 
 def draw_switch(ax, W, H, state=None, highlight=(), dashed=(), fs=7.2):

@@ -39,10 +39,10 @@ code/
   lib/                     network model, exact Markov-chain engine, figure style,
                            network drawing with horizontal and vertical connectors (orthonet.py, netdraw.py)
   analysis/                analysis scripts; each writes tables to results/tables
-  figures/                 one script per figure; writes results/figures
+  figures/                 one script per figure; writes results/figures (figure1_panels.py redraws panels 1a and 1f)
 results/
   tables/                  result tables
-  figures/                 Figure1-Figure7 and FigureS1-FigureS4 (PDF and 600 dpi PNG)
+  figures/                 one PDF per main-text panel (fig1a.pdf ... fig7i.pdf) and FigureS1-FigureS4 (PDF and 600 dpi PNG)
 ```
 
 ## Analysis scripts

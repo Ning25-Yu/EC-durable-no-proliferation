@@ -77,7 +77,7 @@ def panel_write(ax):
     ax.set_ylim(len(order) - 0.5, -0.5)
     ax.set_xlim(0, 12.5)
     ax.set_xticks([0, 4, 8, 12])
-    ax.set_xlabel("Exposure for $a=0.5$, $L_{50}$")
+    ax.set_xlabel("Exposure for 50% durable arrest")
 
 
 if __name__ == "__main__":
@@ -87,7 +87,8 @@ if __name__ == "__main__":
     S.panel(ax, "a", dx=-0.22, dy=1.10)
     cax = fig.add_axes([0.585, 0.03, 0.012, 0.25])
     cb = fig.colorbar(im, cax=cax)
-    cb.set_label("$a(8)$", fontsize=7.5)
+    S.attach("a", cax)
+    cb.set_label("Durable arrest\nprobability", fontsize=7.5)
     cb.outline.set_linewidth(0.4)
     cb.ax.tick_params(labelsize=7, length=2)
     ax_b = fig.add_axes([0.745, 0.60, 0.245, 0.30])

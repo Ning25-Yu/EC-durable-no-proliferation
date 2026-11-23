@@ -31,6 +31,25 @@ ROWS = [
 ATLAS = pd.read_csv(TAB + "/K5_durable_arrest_atlas.csv").query("pulse == 'CDKN1B=1'").set_index("attractor").P_arrest_FP
 
 
+def cell_flags():
+    """Per cell: '*' for a finite-time simulation estimate, 'U' when the simulation left the eventual probability
+    unresolved (no target absorption and most trajectories unclassified at t = 120; Supplementary Table S5)."""
+    F1 = pd.read_csv(TAB + "/F1_driver_lesion_atlas.csv")
+    K5 = pd.read_csv(TAB + "/K5_durable_arrest_atlas.csv").query("pulse == 'CDKN1B=1'").set_index("attractor")
+    pulse = {"p27_ON": "CDKN1B=1", "p27_ON_with_AKT2_OFF": "CDKN1B=1 + AKT2=0"}
+    flags = {}
+    for i, (lesion, col, _) in enumerate(ROWS):
+        for j, a in enumerate(COLS):
+            if lesion == "none":
+                method, unres = K5.loc[a, "method"], K5.loc[a, "max_unresolved_t120"]
+            else:
+                r = F1[(F1.attractor == a) & (F1.lesion == lesion) & (F1.pulse == pulse[col])].iloc[0]
+                method, unres = r.method, r.unresolved_at_t120
+            if str(method).startswith("simulation"):
+                flags[i, j] = "U" if unres > 0.5 else "*"
+    return flags
+
+
 def panel_lesions(ax):
     F = pd.read_csv(TAB + "/K8_lesions.csv")
     M = np.full((len(ROWS), len(COLS)), np.nan)
@@ -41,14 +60,18 @@ def panel_lesions(ax):
                 M[i, j] = d.loc[a, col]
             if lesion == "none":  # intact network: the atlas value (larger simulations where simulated)
                 M[i, j] = ATLAS.loc[a]
+    flags = cell_flags()
     im = ax.imshow(np.nan_to_num(M, nan=0.0), cmap=S.PROB, vmin=0, vmax=1, aspect="auto")
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             v = M[i, j]
+            f = flags.get((i, j), "")
             if np.isnan(v):
                 ax.text(j, i, "n.p.", ha="center", va="center", fontsize=6.3, color=S.GREY)
+            elif f == "U":
+                ax.text(j, i, "U", ha="center", va="center", fontsize=6.3, color=S.INK)
             else:
-                ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=6.3, color="white" if v > 0.55 else S.INK)
+                ax.text(j, i, f"{v:.2f}{f}", ha="center", va="center", fontsize=6.3, color="white" if v > 0.55 else S.INK)
     ax.set_yticks(range(len(ROWS)))
     ax.set_yticklabels([r[2] for r in ROWS], fontsize=7.5)
     ax.set_xticks(range(len(COLS)))

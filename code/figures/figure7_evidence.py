@@ -37,9 +37,8 @@ def panel_model(ax):
         ax.plot(L, y, marker="o", ms=4.5, mfc="white", mec=S.BLUE, mew=1.0, zorder=3)
     ax.set_xlim(0, 8)
     ax.set_ylim(-0.03, 1.03)
-    ax.set_xlabel("p16 exposure $L$ (model time)")
+    ax.set_xlabel("p16 exposure (model time)")
     ax.set_ylabel("Durable arrest probability")
-    ax.set_title("Model, context C0101", fontsize=8.5, pad=3)
 
 
 def panel_duration(ax, readout, title, ymax):
@@ -133,7 +132,6 @@ def panel_cells(ax, gse, phen, groups, title):
     ax.set_xlim(-0.6, max(x for x, _ in xs) + 0.6)
     ax.set_ylim(-6, 6.6)
     ax.set_ylabel("Margin (ON minus OFF)")
-    ax.set_title(title, fontsize=8.5, pad=14)
 
 
 def panel_cptac(ax):
@@ -152,7 +150,6 @@ def panel_cptac(ax):
     ax.set_xlim(-0.6, 1.6)
     ax.set_ylim(-2.6, 2.1)
     ax.set_ylabel("p27 protein (CPTAC)")
-    ax.set_title(f"$P$ = {R.P:.3f}, FDR = {R.FDR:.2f}", fontsize=8, pad=3)
 
 
 if __name__ == "__main__":
