@@ -1,4 +1,4 @@
-name: ec-durable-arrest
+name: ec-durable-no-proliferation
 channels:
   - colomoto
   - conda-forge

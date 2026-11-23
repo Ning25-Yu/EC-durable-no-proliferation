@@ -1,4 +1,4 @@
-# EC-durable-arrest
+# EC-durable-no-proliferation
 
 Network, code and result tables for "Exposure Time, Intervention Sequence and Persistent Signalling Shape Durable
 Growth Arrest in a Logical Model of Endometrial Cancer".
